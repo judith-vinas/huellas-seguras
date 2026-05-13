@@ -1,0 +1,72 @@
+-- TRIGGER DE AUDITORÍA
+CREATE OR REPLACE TRIGGER TRG_AUDIT_ESTADO_ANIMAL
+AFTER UPDATE OF ESTADO ON ANIMALES
+FOR EACH ROW
+BEGIN
+    IF :OLD.ESTADO != :NEW.ESTADO THEN
+        INSERT INTO LOG_CAMBIOS_ANIMAL (
+            ID_ANIMAL, ESTADO_ANTERIOR, ESTADO_NUEVO, FECHA_CAMBIO, USUARIO_BD
+        ) VALUES (
+            :NEW.ID_ANIMAL, :OLD.ESTADO, :NEW.ESTADO, SYSDATE, USER
+        );
+    END IF;
+END;
+/
+
+-- PACKAGE CABECERA
+CREATE OR REPLACE PACKAGE PKG_PROTECTORA AS
+
+    FUNCTION ES_APTO_PARA_ADOPCION(p_id_animal IN NUMBER) RETURN BOOLEAN;
+
+    PROCEDURE PROCESAR_ADOPCION(
+        p_id_animal     IN NUMBER,
+        p_id_adoptante  IN NUMBER,
+        p_observaciones IN VARCHAR2 DEFAULT NULL
+    );
+
+END PKG_PROTECTORA;
+/
+
+-- PACKAGE BODY
+CREATE OR REPLACE PACKAGE BODY PKG_PROTECTORA AS
+
+    FUNCTION ES_APTO_PARA_ADOPCION(p_id_animal IN NUMBER) RETURN BOOLEAN IS
+        v_estado VARCHAR2(20);
+    BEGIN
+        SELECT ESTADO INTO v_estado
+        FROM ANIMALES
+        WHERE ID_ANIMAL = p_id_animal;
+
+        IF v_estado = 'Disponible' THEN
+            RETURN TRUE;
+        ELSE
+            RETURN FALSE;
+        END IF;
+    END ES_APTO_PARA_ADOPCION;
+
+    PROCEDURE PROCESAR_ADOPCION(
+        p_id_animal     IN NUMBER,
+        p_id_adoptante  IN NUMBER,
+        p_observaciones IN VARCHAR2 DEFAULT NULL
+    ) IS
+    BEGIN
+        IF NOT ES_APTO_PARA_ADOPCION(p_id_animal) THEN
+            RAISE_APPLICATION_ERROR(-20001, 'El animal no está disponible para adopción.');
+        END IF;
+
+        INSERT INTO ADOPCIONES (ID_ANIMAL, ID_ADOPTANTE, FECHA, OBSERVACIONES)
+        VALUES (p_id_animal, p_id_adoptante, SYSDATE, p_observaciones);
+
+        UPDATE ANIMALES
+        SET ESTADO = 'Adoptado'
+        WHERE ID_ANIMAL = p_id_animal;
+
+        COMMIT;
+    EXCEPTION
+        WHEN OTHERS THEN
+            ROLLBACK;
+            RAISE;
+    END PROCESAR_ADOPCION;
+
+END PKG_PROTECTORA;
+/
