@@ -10,13 +10,10 @@ Claude (Anthropic) - claude.ai
 **1. Configuración del entorno**
 Le pedí ayuda para instalar y configurar Oracle APEX en un Mac con Apple Silicon, ya que Oracle Database no tiene versión nativa para macOS.
 
-**2. Creación de las tablas**
-Le pedí que me generara el script SQL para crear las tablas del sistema. El primer resultado usaba secuencias separadas, pero le pedí que lo simplificara usando GENERATED ALWAYS AS IDENTITY, que es más moderno y limpio.
-
-**3. Lógica PL/SQL**
+**2. Lógica PL/SQL**
 Le pedí el trigger de auditoría y el package PKG_PROTECTORA con la función de validación y el procedimiento de adopción.
 
-**4. Aplicación APEX**
+**3. Aplicación APEX**
 Me fue guiando paso a paso para crear la app, añadir las páginas y configurarlas con las tablas correspondientes.
 
 ---
