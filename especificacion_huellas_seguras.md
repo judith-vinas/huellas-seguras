@@ -61,7 +61,7 @@
 
 ## 3. Mapa de Navegación (APEX)
 
-- Inicio / Dashboard con estadísticas
+- Inicio
 - Gestión de Animales: listado + formulario de alta/edición
 - Gestión de Adoptantes: listado + formulario de alta/edición
 - Página de Adopción: formulario que llama al procedimiento del paquete
